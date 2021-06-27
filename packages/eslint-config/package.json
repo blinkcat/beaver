@@ -1,0 +1,23 @@
+{
+  "name": "@beaver/eslint-config",
+  "version": "0.1.2",
+  "description": "eslint 配置",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "blinkcat",
+  "dependencies": {
+    "eslint-config-airbnb-typescript": "^12.3.1",
+    "eslint-config-prettier": "^8.3.0"
+  },
+  "peerDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.28.0",
+    "eslint": "^7.29.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.24.0",
+    "eslint-plugin-react-hooks": "^4.2.0"
+  }
+}

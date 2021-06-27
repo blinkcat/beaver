@@ -1,0 +1,1 @@
+# beaver app template

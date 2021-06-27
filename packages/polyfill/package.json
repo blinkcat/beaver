@@ -1,0 +1,15 @@
+{
+  "name": "@beaver/polyfill",
+  "version": "0.1.2",
+  "description": "polyfill",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "blinkcat",
+  "dependencies": {
+    "core-js": "^3.12.1",
+    "regenerator-runtime": "^0.13.7"
+  }
+}

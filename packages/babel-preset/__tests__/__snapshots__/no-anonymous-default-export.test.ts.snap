@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`convert anonymous function 1`] = `
+"\\"use strict\\";
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+exports.default = SrcTest;
+
+function SrcTest() {}"
+`;
+
+exports[`convert arrowFunction 1`] = `
+"\\"use strict\\";
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+exports.default = void 0;
+
+const SrcTest = () => {};
+
+var _default = SrcTest;
+exports.default = _default;"
+`;
+
+exports[`file extension matters 1`] = `
+"\\"use strict\\";
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+exports.default = void 0;
+
+var _default = () => {};
+
+exports.default = _default;"
+`;

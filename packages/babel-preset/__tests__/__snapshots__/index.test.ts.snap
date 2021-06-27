@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`works on react and typescript 1`] = `
+"\\"use strict\\";
+
+var _interopRequireDefault = require(\\"@babel/runtime/helpers/interopRequireDefault\\")[\\"default\\"];
+
+Object.defineProperty(exports, \\"__esModule\\", {
+  value: true
+});
+exports[\\"default\\"] = void 0;
+
+var _react = _interopRequireDefault(require(\\"react\\"));
+
+var Name = function Name(_ref) {
+  var name = _ref.name;
+  return /*#__PURE__*/_react[\\"default\\"].createElement(\\"p\\", null, name);
+};
+
+var Test = function Test() {
+  return /*#__PURE__*/_react[\\"default\\"].createElement(\\"div\\", null, /*#__PURE__*/_react[\\"default\\"].createElement(Name, {
+    name: \\"test\\"
+  }));
+};
+
+var _default = Test;
+exports[\\"default\\"] = _default;"
+`;
