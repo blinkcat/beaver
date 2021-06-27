@@ -1,0 +1,12 @@
+{
+  "name": "@beaver/polyfill",
+  "version": "0.1.0",
+  "description": "polyfill",
+  "main": "index.js",
+  "keywords": [],
+  "author": "blinkcat",
+  "dependencies": {
+    "core-js": "^3.12.1",
+    "regenerator-runtime": "^0.13.7"
+  }
+}

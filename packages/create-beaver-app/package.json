@@ -1,0 +1,30 @@
+{
+  "name": "create-beaver-app",
+  "version": "0.1.0",
+  "description": "create beaver app",
+  "main": "./dist/index.js",
+  "engines": {
+    "node": ">=12"
+  },
+  "bin": {
+    "create-beaver-app": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "rm -rf ./dist && tsc",
+    "prepublish": "npm run build"
+  },
+  "files": [
+    "dist",
+    "template"
+  ],
+  "dependencies": {
+    "@beaver/utils": "^0.1.0",
+    "semver": "^7.3.5"
+  },
+  "devDependencies": {
+    "@types/semver": "^7.3.6",
+    "typescript": "^4.3.4"
+  },
+  "keywords": [],
+  "author": "blinkcat"
+}

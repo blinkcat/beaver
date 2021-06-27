@@ -1,0 +1,11 @@
+{
+  "name": "@beaver/prettier-config",
+  "version": "0.1.0",
+  "description": "prettier-config",
+  "main": "index.js",
+  "keywords": [],
+  "author": "blinkcat",
+  "peerDependencies": {
+    "prettier": "^2.3.2"
+  }
+}

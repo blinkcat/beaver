@@ -1,0 +1,23 @@
+{
+  "name": "@beaver/types",
+  "version": "0.1.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "rm -rf ./dist && tsc",
+    "prepublish": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "webpack": "^5.69.1",
+    "webpack-dev-server": "^4.7.4"
+  },
+  "devDependencies": {
+    "typescript": "^4.3.4"
+  },
+  "keywords": [],
+  "author": ""
+}

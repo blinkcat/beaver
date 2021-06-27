@@ -1,0 +1,30 @@
+{
+  "name": "@beaver/utils",
+  "version": "0.1.0",
+  "description": "utils",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "rm -rf ./dist && tsc",
+    "prepublish": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "cheerio": "^1.0.0-rc.10",
+    "fs-extra": "^10.0.0",
+    "loader-utils": "^3.2.0",
+    "mri": "^1.2.0",
+    "resolve": "^1.22.0",
+    "tapable": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.11",
+    "@types/loader-utils": "^2.0.3",
+    "@types/resolve": "^1.20.1",
+    "typescript": "^4.3.4"
+  },
+  "keywords": [],
+  "author": ""
+}

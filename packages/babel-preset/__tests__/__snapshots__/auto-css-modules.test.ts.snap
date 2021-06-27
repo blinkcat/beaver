@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ignores directly import 1`] = `
+"\\"use strict\\";
+
+require(\\"./test.css\\");"
+`;
+
+exports[`works on css file 1`] = `
+"\\"use strict\\";
+
+var _test = _interopRequireDefault(require(\\"./test.css?modules\\"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }"
+`;
+
+exports[`works on less file 1`] = `
+"\\"use strict\\";
+
+var _test = _interopRequireDefault(require(\\"./test.less?modules\\"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }"
+`;
+
+exports[`works on sass file 1`] = `
+"\\"use strict\\";
+
+var _test = _interopRequireDefault(require(\\"./test.sass?modules\\"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }"
+`;
+
+exports[`works on scss file 1`] = `
+"\\"use strict\\";
+
+var _test = _interopRequireDefault(require(\\"./test.scss?modules\\"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }"
+`;
