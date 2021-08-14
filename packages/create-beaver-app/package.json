@@ -1,6 +1,6 @@
 {
   "name": "create-beaver-app",
-  "version": "0.1.11",
+  "version": "0.1.15",
   "description": "create beaver app",
   "main": "./dist/index.js",
   "engines": {

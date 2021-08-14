@@ -5,9 +5,12 @@ import fs from 'fs';
 // Webpack v5 comes with the latest terser-webpack-plugin out of the box.
 // eslint-disable-next-line import/no-extraneous-dependencies
 import TerserPlugin from 'terser-webpack-plugin';
-import cherrio, { CheerioAPI } from 'cheerio';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import { WebpackManifestPlugin } from 'webpack-manifest-plugin';
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
+import cherrio, { CheerioAPI } from 'cheerio';
 import merge from 'deepmerge';
 import { IApi } from '../api';
 import { ETriggerType } from '../coreService';
@@ -19,7 +22,7 @@ export interface IClientProdArgs {
 
 export async function getConfig(api: IApi, args: IClientProdArgs = {}) {
   const {
-    paths: { appSrcClientIndex, appOutputPath, appSrc },
+    paths: { appSrcClientIndex, appOutputPath, appSrc, appTsconfig },
     userConfig: { devtool, publicPath, jsPrefix = '', cssPrefix = '' },
   } = api.context;
   const { profile } = args;
@@ -68,6 +71,11 @@ export async function getConfig(api: IApi, args: IClientProdArgs = {}) {
             // https://github.com/facebook/create-react-app/issues/2488
             ascii_only: true,
           },
+        },
+      }),
+      new CssMinimizerPlugin({
+        minimizerOptions: {
+          preset: 'default',
         },
       }),
     ],
@@ -144,6 +152,21 @@ export async function getConfig(api: IApi, args: IClientProdArgs = {}) {
     new MiniCssExtractPlugin({
       filename: path.join(cssPrefix, '[name].[contenthash:8].css'),
       chunkFilename: path.join(cssPrefix, '[name].[contenthash:8].chunk.css'),
+    }),
+    new ForkTsCheckerWebpackPlugin({
+      typescript: {
+        configFile: appTsconfig,
+        mode: 'write-references',
+        diagnosticOptions: {
+          semantic: true,
+          syntactic: true,
+        },
+      },
+    }),
+    new WebpackManifestPlugin({
+      filter(file) {
+        return file.isChunk;
+      },
     }),
   ];
 

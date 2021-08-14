@@ -1,7 +1,7 @@
 import webpack, { Configuration } from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import { IApi } from '../../api';
-import { getWebpackConfig } from '../../config';
+import { getConfig } from '../../config/client-dev';
 import { ETriggerType } from '../../coreService';
 
 // https://github.com/node-modules/detect-port
@@ -13,12 +13,16 @@ export default (api: IApi) => {
     const config: Configuration = await api.context.trigger({
       type: ETriggerType.modify,
       name: 'modifyWebpackConfig',
-      initialValue: await getWebpackConfig({ env: 'development', type: 'client' }, api, args),
+      initialValue: await getConfig(api, args),
       args: { env: 'development', type: 'client' },
     });
 
     const server = new WebpackDevServer(webpack(config), {
       hot: true,
+      open: true,
+      historyApiFallback: true,
+      // 如果是 false 会和 Webpackbar 冲突
+      noInfo: true,
     });
 
     server.listen(3000, err => {

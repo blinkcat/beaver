@@ -4,7 +4,7 @@
   "description": "beaver app template",
   "scripts": {
     "start": "beaver dev",
-    "buiild": "beaver build"
+    "build": "beaver build"
   },
   "dependencies": {
     "react": "^17.0.2",
@@ -25,5 +25,17 @@
       "project": "./tsconfig.json"
     }
   },
-  "prettier": "@beaver/prettier-config"
+  "prettier": "@beaver/prettier-config",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }

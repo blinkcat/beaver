@@ -1,6 +1,6 @@
 {
   "name": "beaver",
-  "version": "0.1.6",
+  "version": "0.1.11",
   "description": "",
   "main": "./dist/index.js",
   "bin": {
@@ -13,20 +13,23 @@
   "keywords": [],
   "files": [
     "bin",
-    "dist"
+    "dist",
+    "beaver-app.d.ts"
   ],
+  "types": "./beaver-app.d.ts",
   "author": "blinkcat",
   "dependencies": {
     "@babel/register": "^7.14.5",
-    "@beaver/babel-preset": "^0.1.4",
-    "@beaver/eslint-config": "^0.1.2",
-    "@beaver/prettier-config": "^0.1.2",
+    "@beaver/babel-preset": "^0.1.5",
+    "@beaver/eslint-config": "^0.1.3",
+    "@beaver/prettier-config": "^0.1.3",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "babel-loader": "^8.2.2",
     "cheerio": "^1.0.0-rc.10",
     "crequire": "^1.8.1",
     "css-loader": "^6.2.0",
+    "css-minimizer-webpack-plugin": "^3.0.2",
     "debug": "^4.3.2",
     "deepmerge": "^4.2.2",
     "eslint": "^7.29.0",
@@ -34,6 +37,7 @@
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "fork-ts-checker-webpack-plugin": "^6.3.2",
     "html-webpack-plugin": "^5.3.2",
     "mini-css-extract-plugin": "^2.2.0",
     "mri": "^1.1.6",
@@ -49,10 +53,13 @@
     "tapable": "^2.2.0",
     "typescript": "^4.3.4",
     "webpack": "^5.45.1",
-    "webpack-dev-server": "^3.11.2"
+    "webpack-dev-server": "^3.11.2",
+    "webpack-manifest-plugin": "^4.0.2",
+    "webpackbar": "^5.0.0-3"
   },
   "devDependencies": {
-    "@beaver/utils": "^0.1.1",
+    "@beaver/utils": "^0.1.2",
+    "@types/css-minimizer-webpack-plugin": "^3.0.2",
     "@types/debug": "^4.1.6",
     "@types/mini-css-extract-plugin": "^2.2.0",
     "@types/mri": "^1.1.1",
