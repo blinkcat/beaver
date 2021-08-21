@@ -4,35 +4,23 @@ import type { Configuration as WebpackConfiguration } from 'webpack';
 import type CoreService from './coreService';
 import paths from './paths';
 import { IBeaverConfig } from './loadConfig';
+import type { TGetLogger } from './plugins/logger';
 
-type TApiContext = Pick<CoreService, 'userConfig' | 'paths' | 'trigger'>;
+type TApiContext = Pick<CoreService, 'userConfig' | 'paths' | 'trigger' | 'triggerType'>;
 
 type TModifyHook<T = any> = ((value: T) => Promise<T>) | ({ fn(value: T): Promise<T> } & Tap);
 
-export interface IApi extends Api {
+export interface IApi extends Api, TApiContext {
   modifyPaths(fn: TModifyHook<typeof paths>): void;
   modifyConfig(fn: TModifyHook<IBeaverConfig>): void;
   modifyWebpackConfig(fn: TModifyHook<WebpackConfiguration>): void;
   modifyBabelConfig(fn: TModifyHook): void;
   modifyHtml(fn: TModifyHook<CheerioAPI>): void;
+  getLogger: TGetLogger;
 }
 
 export default class Api {
-  context: TApiContext;
-
-  constructor(private readonly coreService: CoreService) {
-    this.context = new Proxy({} as TApiContext, {
-      get(_, prop: keyof CoreService) {
-        if (['userConfig', 'paths', 'trigger'].includes(prop)) {
-          if (typeof coreService[prop] === 'function') {
-            return (coreService[prop] as Function).bind(coreService);
-          }
-          return coreService[prop];
-        }
-        return undefined;
-      },
-    });
-  }
+  constructor(private readonly coreService: CoreService) {}
 
   registerMethod(name: string, fn?: Function) {
     const { methods, hooks } = this.coreService;
@@ -65,8 +53,6 @@ export default class Api {
     commands.set(name, fn);
     return true;
   }
-
-  getLog() {}
 
   validate() {}
 }

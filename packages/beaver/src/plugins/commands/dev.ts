@@ -2,7 +2,6 @@ import webpack, { Configuration } from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import { IApi } from '../../api';
 import { getConfig } from '../../config/client-dev';
-import { ETriggerType } from '../../coreService';
 
 // https://github.com/node-modules/detect-port
 
@@ -10,8 +9,8 @@ export default (api: IApi) => {
   api.registerCommand('dev', async (args: any) => {
     process.env.NODE_ENV = 'development';
 
-    const config: Configuration = await api.context.trigger({
-      type: ETriggerType.modify,
+    const config: Configuration = await api.trigger({
+      type: api.triggerType.modify,
       name: 'modifyWebpackConfig',
       initialValue: await getConfig(api, args),
       args: { env: 'development', type: 'client' },

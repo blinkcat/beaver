@@ -23,8 +23,8 @@ export interface IClientProdArgs {
 export async function getConfig(api: IApi, args: IClientProdArgs = {}) {
   const {
     paths: { appSrcClientIndex, appOutputPath, appSrc, appTsconfig },
-    userConfig: { devtool, publicPath, jsPrefix = '', cssPrefix = '' },
-  } = api.context;
+    userConfig: { devtool, publicPath, jsPrefix = '', cssPrefix = '', mediaPrefix = '' },
+  } = api;
   const { profile } = args;
 
   const config: Configuration = {
@@ -45,6 +45,7 @@ export async function getConfig(api: IApi, args: IClientProdArgs = {}) {
     filename: path.join(jsPrefix, '[name].[contenthash:8].js'),
     chunkFilename: path.join(jsPrefix, '[name].[contenthash:8].chunk.js'),
     publicPath,
+    assetModuleFilename: path.join(mediaPrefix, '[name].[hash:8].[ext]'),
     globalObject: 'this',
   };
 
@@ -95,12 +96,12 @@ export async function getConfig(api: IApi, args: IClientProdArgs = {}) {
     extensions,
   };
 
-  const babelConfig = await api.context.trigger({
+  const babelConfig = await api.trigger({
     type: ETriggerType.modify,
     initialValue: {
       babelrc: false,
       configFile: false,
-      presets: [['@beaver/babel-preset', {}]],
+      presets: [['@beaver/babel-preset', { transformReactRemovePropTypes: true }]],
     },
     name: 'modifyBabelConfig',
     args: { env: 'production', type: 'client' },
@@ -138,7 +139,7 @@ export async function getConfig(api: IApi, args: IClientProdArgs = {}) {
     ],
   };
 
-  const $: CheerioAPI = await api.context.trigger({
+  const $: CheerioAPI = await api.trigger({
     name: 'modifyHtml',
     type: ETriggerType.modify,
     initialValue: cherrio.load(fs.readFileSync(path.join(__dirname, './template.html'), { encoding: 'utf-8' })),

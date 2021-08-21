@@ -38,6 +38,8 @@ export default class CoreService {
 
   commands = new Map<string, Function>();
 
+  triggerType = ETriggerType;
+
   async init() {
     this.userConfig = loadConfig();
     this.initPlugins();
@@ -55,6 +57,27 @@ export default class CoreService {
     });
   }
 
+  getApi() {
+    const self = this;
+
+    return new Proxy(new Api(self), {
+      get(target, prop: keyof CoreService) {
+        if (['userConfig', 'paths', 'trigger', 'triggerType'].includes(prop)) {
+          if (typeof self[prop] === 'function') {
+            return (self[prop] as Function).bind(self);
+          }
+          return self[prop];
+        }
+
+        if (self.methods.has(prop)) {
+          return self.methods.get(prop)!;
+        }
+
+        return (target as any)[prop];
+      },
+    });
+  }
+
   initPlugins() {
     // load plugins
     this.plugins = [...builtinPlugins, ...(this.userConfig.plugins || [])].map(plugin => {
@@ -65,7 +88,7 @@ export default class CoreService {
     });
 
     for (const plugin of this.plugins) {
-      plugin.exec(new Api(this), plugin.options);
+      plugin.exec(this.getApi(), plugin.options);
     }
   }
 
