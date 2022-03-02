@@ -1,7 +1,10 @@
 import fs from 'fs';
+import { debuglog, inspect } from 'util';
 import { resolve } from '@beaver/utils';
 import type { IBeaverConfig } from '@beaver/types';
 import paths from './paths';
+
+const debug = debuglog('config');
 
 const defaultConfig: IBeaverConfig = {
   port: 3000,
@@ -12,6 +15,7 @@ const defaultConfig: IBeaverConfig = {
   fastRefresh: true,
   jsxRuntime: true,
   publicPath: '/',
+  ssg: false,
 };
 
 export class ConfigManager {
@@ -45,8 +49,15 @@ export class ConfigManager {
 
       const userConfig = require(paths.appBeaverConfig);
 
+      debug(`loadConfig is done, userConfig is:\n${inspect(userConfig)}`);
+
       this.inputConfig = { ...defaultConfig, ...(userConfig.default || userConfig) };
     }
+  }
+
+  resolveConfig(resolvedConfig: IBeaverConfig) {
+    Object.assign(this.resolvedConfig, resolvedConfig);
+    debug(`config resolved, resolvedConfig is:\n${inspect(this.resolvedConfig)}`);
   }
 
   // find all relative ts import
@@ -59,15 +70,16 @@ export class ConfigManager {
       const currentDep = deps.pop();
       const fileDeps = crequire(fs.readFileSync(currentDep!, { encoding: 'utf-8' }));
 
-      if (Array.isArray(fileDeps)) {
-        fileDeps.forEach(dep => {
-          const absDep = resolve.sync(dep.path as string, { basedir: currentDep, extensions: ['.js', '.ts'] });
+      if (!Array.isArray(fileDeps)) {
+        continue;
+      }
 
-          if (!found.has(absDep) && !/node_modules/.test(absDep)) {
-            deps.push(absDep);
-            found.add(absDep);
-          }
-        });
+      for (let i = 0; i < fileDeps.length; i++) {
+        const absDep = resolve.sync(fileDeps[i].path as string, { basedir: currentDep, extensions: ['.js', '.ts'] });
+        if (!found.has(absDep) && !/node_modules/.test(absDep) && absDep[0] === '/') {
+          deps.push(absDep);
+          found.add(absDep);
+        }
       }
     }
 

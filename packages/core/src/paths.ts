@@ -5,15 +5,14 @@ import { IBeaverPaths } from '@beaver/types';
 // https://github.com/facebookincubator/create-react-app/issues/637
 const realAppDirectory = fs.realpathSync(process.cwd());
 
-function resolveApp(relativePath: string) {
+export function resolveApp(relativePath: string) {
   return path.resolve(realAppDirectory, relativePath);
 }
 
 const paths: IBeaverPaths = {
   appRoot: resolveApp('.'),
   appSrc: resolveApp('src'),
-  appSrcClientIndex: resolveApp('src/index'),
-  appSrcServerIndex: resolveApp('src/server'),
+  appSrcIndex: resolveApp('src/index'),
   appPublic: resolveApp('public'),
   appPackageJson: resolveApp('package.json'),
   appTsConfig: resolveApp('tsconfig.json'),
@@ -23,6 +22,7 @@ const paths: IBeaverPaths = {
   appNodeModules: resolveApp('node_modules'),
   appHtml: resolveApp('public/index.html'),
   appTsBuildInfoFile: resolveApp('node_modules/.cache/tsconfig.tsbuildinfo'),
+  appSrcSsgIndex: resolveApp('src/ssg'),
 };
 
 export default paths;

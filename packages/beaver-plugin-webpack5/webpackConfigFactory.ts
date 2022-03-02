@@ -18,7 +18,8 @@ import createModules from './modules';
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
 export default async function webpackConfigFactory(
   webpackEnv: 'development' | 'production',
-  context: IBeaverPluginContext
+  context: IBeaverPluginContext,
+  isServer: boolean = false
 ): Promise<Configuration> {
   const isEnvDevelopment = webpackEnv === 'development';
   const isEnvProduction = webpackEnv === 'production';
@@ -46,7 +47,7 @@ export default async function webpackConfigFactory(
         loader: MiniCssExtractPlugin.loader,
         // css is located in `static/css`, use '../../' to locate index.html folder
         // in production `paths.publicUrlOrPath` can be a relative path
-        options: config.publicPath!.startsWith('.') ? { publicPath: '../../' } : {},
+        options: config.publicPath!.startsWith('.') ? { publicPath: '../../', emit: !isServer } : { emit: !isServer },
       },
       {
         loader: require.resolve('css-loader'),
@@ -116,7 +117,7 @@ export default async function webpackConfigFactory(
       : isEnvDevelopment && 'cheap-module-source-map',
     // These are the "entry points" to our application.
     // This means they will be the "root" imports that are included in JS bundle.
-    entry: paths.appSrcClientIndex,
+    entry: paths.appSrcIndex,
     output: {
       // The build folder.
       path: paths.appOutputPath,
@@ -150,7 +151,7 @@ export default async function webpackConfigFactory(
     // https://github.com/webpack/changelog-v5/blob/master/guides/persistent-caching.md
     cache: {
       type: 'filesystem',
-      version: pkgJson.version,
+      version: `${isServer ? 'server' : 'client'}-${pkgJson.version}`,
       cacheDirectory: paths.appWebpackCache,
       store: 'pack',
       buildDependencies: {
@@ -224,7 +225,7 @@ export default async function webpackConfigFactory(
           }
         : undefined,
       // https://twitter.com/wSokra/status/969679223278505985
-      runtimeChunk: true,
+      runtimeChunk: 'single',
     },
     resolve: {
       // This allows you to set a fallback for where webpack should look for modules.
@@ -333,6 +334,7 @@ export default async function webpackConfigFactory(
                     {
                       runtime: config.jsxRuntime ? 'automatic' : 'classic',
                       dev: isEnvDevelopment,
+                      isServer,
                     },
                   ],
                 ],
@@ -451,26 +453,27 @@ export default async function webpackConfigFactory(
     },
     plugins: [
       // Generates an `index.html` file with the <script> injected.
-      new HtmlWebpackPlugin({
-        inject: true,
-        templateContent: await context.methods.getHtml(),
-        ...(isEnvProduction
-          ? {
-              minify: {
-                removeComments: true,
-                collapseWhitespace: true,
-                removeRedundantAttributes: true,
-                useShortDoctype: true,
-                removeEmptyAttributes: true,
-                removeStyleLinkTypeAttributes: true,
-                keepClosingSlash: true,
-                minifyJS: true,
-                minifyCSS: true,
-                minifyURLs: true,
-              },
-            }
-          : {}),
-      }),
+      !isServer &&
+        new HtmlWebpackPlugin({
+          inject: true,
+          templateContent: await context.methods.getHtml(),
+          ...(isEnvProduction
+            ? {
+                minify: {
+                  removeComments: true,
+                  collapseWhitespace: true,
+                  removeRedundantAttributes: true,
+                  useShortDoctype: true,
+                  removeEmptyAttributes: true,
+                  removeStyleLinkTypeAttributes: true,
+                  keepClosingSlash: true,
+                  minifyJS: true,
+                  minifyCSS: true,
+                  minifyURLs: true,
+                },
+              }
+            : {}),
+        }),
       // Makes some environment variables available to the JS code, for example:
       // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
       // It is absolutely essential that NODE_ENV is set to production

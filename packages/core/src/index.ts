@@ -4,6 +4,7 @@ import configManager from './configManager';
 import configPlugin, { hooks as configPluginHooks, resolvedConfigProxy } from './plugin/config';
 import pathsPlugin, { hooks as pathsPluginHooks } from './plugin/paths';
 import htmlPlugin from './plugin/html';
+import ssgPlugin from './plugin/ssg';
 import devCommandPlugin from './plugin/command/dev';
 import buildCommandPlugin from './plugin/command/build';
 import paths from './paths';
@@ -16,13 +17,14 @@ export default async function init() {
     configPlugin,
     pathsPlugin,
     htmlPlugin,
+    ssgPlugin,
     devCommandPlugin,
     buildCommandPlugin,
     ...(configManager.inputConfig?.plugins || []),
   ]);
 
   // trigger internal hooks
-  Object.assign(configManager.resolvedConfig, await configPluginHooks.config.promise({ ...configManager.inputConfig }));
+  configManager.resolveConfig(await configPluginHooks.config.promise({ ...configManager.inputConfig }));
   Object.assign(paths, await pathsPluginHooks.paths.promise(paths, { config: resolvedConfigProxy }));
 
   const {

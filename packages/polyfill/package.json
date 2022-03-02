@@ -1,6 +1,6 @@
 {
   "name": "@beaver/polyfill",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "polyfill",
   "main": "index.js",
   "keywords": [],

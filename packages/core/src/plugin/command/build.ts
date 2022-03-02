@@ -18,10 +18,10 @@ const buildCommandPlugin: IBeaverPluginFactory = context => ({
       });
       process.env.NODE_ENV = 'production';
 
-      const { getWebpackConfig, getWebpack } = context.methods;
+      const { getWebpackConfigs, getWebpack, createWebpackConfig } = context.methods;
       const webpack = getWebpack();
-      const webpackConfig = await getWebpackConfig({ env: process.env.NODE_ENV });
-      const compiler = webpack(webpackConfig);
+      const webpackConfigs = await getWebpackConfigs(await createWebpackConfig({ env: 'production', isServer: false }));
+      const compiler = webpack(webpackConfigs);
 
       console.log('creating a production build...');
 
@@ -54,7 +54,7 @@ const buildCommandPlugin: IBeaverPluginFactory = context => ({
           console.warn(info.warnings);
         }
 
-        printBuildResult(info);
+        info.children?.forEach(printBuildResult);
       });
     });
   },

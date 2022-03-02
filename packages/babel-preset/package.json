@@ -1,6 +1,6 @@
 {
   "name": "@beaver/babel-preset",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "babel preset",
   "main": "./dist/index.js",
   "scripts": {

@@ -25,17 +25,17 @@ const devCommandPlugin: IBeaverPluginFactory = context => ({
       });
       process.env.NODE_ENV = 'development';
 
-      const { getWebpackConfig, getWebpack } = context.methods;
+      const { getWebpackConfigs, getWebpack, createWebpackConfig } = context.methods;
 
       const webpack = getWebpack();
-      const webpackConfig = await getWebpackConfig({ env: process.env.NODE_ENV });
+      const webpackConfigs = await getWebpackConfigs(await createWebpackConfig({ env: 'development' }));
 
       const devServerConfig = await hooks.devServer.promise(
         getDevServerConfig(context.methods.getResolvedConfig(), context.methods.getPaths()),
         { config: context.methods.getResolvedConfig() }
       );
 
-      const compiler = webpack(webpackConfig);
+      const compiler = webpack(webpackConfigs);
       const server = new WebpackDevServer(devServerConfig, compiler);
 
       server.start().catch(err => {

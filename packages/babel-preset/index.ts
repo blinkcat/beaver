@@ -9,6 +9,7 @@ export interface IOptions {
   noAnonymousDefaultExport?: boolean;
   transformRuntime?: boolean;
   runtime?: 'classic' | 'automatic';
+  isServer?: boolean;
 }
 
 const defaultOptions: IOptions = {
@@ -20,6 +21,7 @@ const defaultOptions: IOptions = {
   noAnonymousDefaultExport: false,
   transformRuntime: true,
   runtime: 'classic',
+  isServer: false,
 };
 
 // eslint-disable-next-line func-names
@@ -34,7 +36,21 @@ export default function (api: ConfigAPI, userOptions: IOptions = {}) {
     noAnonymousDefaultExport,
     transformRuntime,
     runtime,
+    isServer,
   } = options;
+
+  const presetEnvOptions: any = {
+    useBuiltIns: 'entry',
+    corejs: 3,
+    // Exclude transforms that make all code slower
+    exclude: ['transform-typeof-symbol'],
+  };
+
+  if (isServer) {
+    presetEnvOptions.targets = {
+      node: true,
+    };
+  }
 
   /** @see https://babeljs.io/docs/en/config-files#apiassertversionrange */
   api.assertVersion('^7.0.0');
@@ -42,7 +58,7 @@ export default function (api: ConfigAPI, userOptions: IOptions = {}) {
   return {
     presets: [
       /** @see https://babel.dev/docs/en/babel-preset-env */
-      [require('@babel/preset-env').default, { useBuiltIns: 'entry', corejs: 3 }],
+      [require('@babel/preset-env').default, presetEnvOptions],
       /** @see https://babel.dev/docs/en/babel-preset-react */
       react && [require('@babel/preset-react').default, { development: dev, runtime }],
       /** @see https://babel.dev/docs/en/babel-preset-typescript */
