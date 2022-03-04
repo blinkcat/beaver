@@ -1,6 +1,10 @@
+// eslint-disable-next-line import/no-duplicates
 import type webpack from 'webpack';
+// eslint-disable-next-line import/no-duplicates
+import type { RuleSetConditionAbsolute } from 'webpack';
 import type { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import type { CheerioAPI } from 'cheerio';
+import type { TransformOptions } from '@babel/core';
 
 export type TWebpack = typeof webpack;
 export type TWebpackCompiler = webpack.Compiler;
@@ -20,6 +24,13 @@ export interface IModifyWebpackConfigArgs {
   isServer?: boolean;
 }
 
+export type TBabelTransformOptions = TransformOptions;
+
+export interface IModifyBabelOptionArgs {
+  env: string;
+  isServer?: boolean;
+}
+
 export interface IBeaverPlugin {
   name: string;
   register?: (args: IRegisterHookArgs) => void;
@@ -32,6 +43,7 @@ export interface IBeaverPlugin {
     args: { config: IBeaverConfig }
   ) => Promise<WebpackDevServerConfiguration>;
   html?: ($: CheerioAPI) => Promise<void>;
+  babel?: (options: TransformOptions) => Promise<TransformOptions>;
   [other: string]: any;
 }
 
@@ -52,6 +64,10 @@ export interface IBeaverPluginContext {
     getPaths(): Readonly<IBeaverPaths>;
     getHtml(): Promise<string>;
     createWebpackConfig: TCreateWebpackConfig;
+    modifyBabelOptions: (
+      initialOptions: TBabelTransformOptions,
+      args: IModifyBabelOptionArgs
+    ) => Promise<TransformOptions>;
   } & Partial<{
     [other: string]: Function;
   }>;
@@ -100,6 +116,7 @@ export interface IBeaverConfig {
   host?: string;
   publicPath?: string;
   ssg?: boolean;
+  extraBabelInclude?: RuleSetConditionAbsolute[];
   [other: string]: any;
 }
 

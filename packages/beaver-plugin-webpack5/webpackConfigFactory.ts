@@ -105,6 +105,26 @@ export default async function webpackConfigFactory(
     return loaders;
   };
 
+  const babelOptions = await context.methods.modifyBabelOptions(
+    {
+      babelrc: false,
+      configFile: false,
+      compact: isEnvProduction,
+      plugins: isEnvDevelopment && config.fastRefresh ? [require.resolve('react-refresh/babel')] : [],
+      presets: [
+        [
+          require.resolve('@beaver/babel-preset'),
+          {
+            runtime: config.jsxRuntime ? 'automatic' : 'classic',
+            dev: isEnvDevelopment,
+            isServer,
+          },
+        ],
+      ],
+    },
+    { env: webpackEnv, isServer }
+  );
+
   return {
     target: ['browserslist'],
     mode: isEnvProduction ? 'production' : isEnvDevelopment ? 'development' : undefined,
@@ -325,29 +345,12 @@ export default async function webpackConfigFactory(
             // The preset includes JSX, Flow, TypeScript, and some ESnext features.
             {
               test: /\.(js|mjs|jsx|ts|tsx)$/,
-              include: paths.appSrc,
+              include: [paths.appSrc, ...(config.extraBabelInclude || [])],
               loader: require.resolve('babel-loader'),
               options: {
-                presets: [
-                  [
-                    require.resolve('@beaver/babel-preset'),
-                    {
-                      runtime: config.jsxRuntime ? 'automatic' : 'classic',
-                      dev: isEnvDevelopment,
-                      isServer,
-                    },
-                  ],
-                ],
-                // @remove-on-eject-begin
-                babelrc: false,
-                configFile: false,
                 cacheIdentifier: getCacheIdentifier(
                   isEnvProduction ? 'production' : isEnvDevelopment ? 'development' : '',
                   ['@beaver/babel-preset', '@beaver/utils', 'beaver-plugin-webpack5']
-                ),
-                // @remove-on-eject-end
-                plugins: [isEnvDevelopment && config.fastRefresh && require.resolve('react-refresh/babel')].filter(
-                  Boolean
                 ),
                 // This is a feature of `babel-loader` for webpack (not Babel itself).
                 // It enables caching results in ./node_modules/.cache/babel-loader/
@@ -355,7 +358,7 @@ export default async function webpackConfigFactory(
                 cacheDirectory: true,
                 // See #6846 for context on why cacheCompression is disabled
                 cacheCompression: false,
-                compact: isEnvProduction,
+                ...babelOptions,
               },
             },
             // "postcss" loader applies autoprefixer to our CSS.

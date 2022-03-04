@@ -3,7 +3,9 @@
 import { IBeaverPluginFactory, TWebpackCompiler, TWebpackStatsCompilation } from '@beaver/types';
 import { fs } from '@beaver/utils';
 import path from 'path';
-import { debuglog, inspect } from 'util';
+import { debuglog } from 'util';
+
+const LoadablePlugin = require('@loadable/webpack-plugin');
 
 const SSG_SCRIPT_NAME = 'ssg.js';
 const debug = debuglog('ssgPlugin');
@@ -28,55 +30,25 @@ function createNotify() {
 
 const notify = createNotify();
 
-function extractAssets(stats: TWebpackStatsCompilation) {
-  const assets: { js: string[]; css: string[] } = {
-    js: [],
-    css: [],
-  };
-
-  const jsSet = new Set<string>();
-  const cssSet = new Set<string>();
-
-  Object.keys(stats.entrypoints || {}).forEach(entryName => {
-    stats.entrypoints?.[entryName].assets?.forEach(asset => {
-      if (asset.name.endsWith('.js')) {
-        jsSet.add(path.join('/', asset.name));
-      } else if (asset.name.endsWith('.css')) {
-        cssSet.add(path.join('/', asset.name));
-      }
-    });
-  });
-
-  assets.js = [...jsSet];
-  assets.css = [...cssSet];
-
-  return assets;
-}
-
+// generate static html
 class StaticSiteGenerationPlugin {
   apply(compiler: TWebpackCompiler) {
     compiler.hooks.done.tapPromise('StaticSiteGenerationPlugin', async stats => {
       try {
         const clientStats = await notify;
-        const clientAssets = extractAssets(clientStats);
-
-        debug(`client assets: ${inspect(clientAssets)}`);
-
         const { outputPath } = stats.toJson({ all: false, outputPath: true });
 
         debug(`StaticSiteGenerationPlugin outputPath: ${outputPath}`);
 
         const { render, routes } = require(path.join(outputPath!, SSG_SCRIPT_NAME));
-        const pageUrls: string[] = await Promise.resolve(routes());
+        const urls = await routes();
 
-        debug(`pageUrls: ${inspect(pageUrls)}`);
-
-        if (Array.isArray(pageUrls)) {
-          for (const pageUrl of pageUrls) {
-            const assetPath = path.join(outputPath!, pageUrl, 'index.html');
+        if (Array.isArray(urls)) {
+          for (const url of urls) {
+            const assetPath = path.join(outputPath!, url, 'index.html');
 
             debug(`url -> ${assetPath}`);
-            fs.outputFileSync(assetPath, render({ url: pageUrl, assets: clientAssets }).html);
+            fs.outputFileSync(assetPath, render({ url, stats: clientStats }).html);
           }
         } else {
           throw Error('routes must return a string array!');
@@ -89,10 +61,25 @@ class StaticSiteGenerationPlugin {
   }
 }
 
+// supply client assets infos
 class SSGNotifyPlugin {
   apply(compiler: TWebpackCompiler) {
     compiler.hooks.afterCompile.tap('SSGNotifyPlugin', compilation => {
-      notify.resolve(compilation.getStats().toJson({ all: false, entrypoints: true }));
+      // notify.resolve(compilation.getStats().toJson({ all: false, entrypoints: true }));
+      notify.resolve(
+        compilation.getStats().toJson({
+          all: false,
+          assets: true,
+          cachedAssets: true,
+          chunks: true,
+          chunkGroups: true,
+          chunkGroupChildren: true,
+          hash: true,
+          ids: true,
+          outputPath: true,
+          publicPath: true,
+        })
+      );
     });
     compiler.hooks.failed.tap('SSGNotifyPlugin', err => {
       notify.reject(err);
@@ -102,15 +89,21 @@ class SSGNotifyPlugin {
 
 const ssgPlugin: IBeaverPluginFactory = context => ({
   name: '__ssgPlugin',
+  async babel(options) {
+    const { ssg } = context.methods.getResolvedConfig();
+    if (ssg) {
+      options.plugins = [...(options.plugins || []), '@loadable/babel-plugin'];
+    }
+    return options;
+  },
   async webpack(config, { isServer }) {
     const paths = context.methods.getPaths();
     const webpack = context.methods.getWebpack();
     const { ssg } = context.methods.getResolvedConfig();
 
-    if (context.methods.getResolvedConfig().ssg && process.env.NODE_ENV === 'production') {
+    if (ssg && process.env.NODE_ENV === 'production') {
       if (isServer) {
         config.entry = { ssg: paths.appSrcSsgIndex };
-
         config.target = 'node';
         config.output!.library = { type: 'commonjs2' };
         config.output!.filename = '[name].js';
@@ -141,6 +134,11 @@ const ssgPlugin: IBeaverPluginFactory = context => ({
         };
 
         config.plugins!.push(new StaticSiteGenerationPlugin());
+        config.plugins!.push(
+          new webpack.optimize.LimitChunkCountPlugin({
+            maxChunks: 1,
+          })
+        );
       } else {
         // if ssg is on, we don't need HtmlWebpackPlugin
         const index = config.plugins!.findIndex(plugin => plugin.constructor.name === 'HtmlWebpackPlugin');
@@ -150,11 +148,13 @@ const ssgPlugin: IBeaverPluginFactory = context => ({
         }
 
         config.plugins!.push(new SSGNotifyPlugin());
+        // disable both the outputAsset and writeToDisk options in the webpack plugin to prevent it from calling stats.toJson()
+        config.plugins!.push(new LoadablePlugin({ outputAsset: false, writeToDisk: false }));
       }
     }
     config.plugins!.push(
       new webpack.DefinePlugin({
-        'process.env.SSG': ssg,
+        'process.env.SSG': !!ssg && process.env.NODE_ENV === 'production',
       })
     );
     return config;

@@ -1,6 +1,6 @@
 {
   "name": "create-beaver-app",
-  "version": "0.1.7",
+  "version": "0.1.11",
   "description": "create beaver app",
   "main": "./dist/index.js",
   "engines": {
@@ -18,7 +18,7 @@
     "template"
   ],
   "dependencies": {
-    "@beaver/utils": "^0.1.1",
+    "@beaver/utils": "^0.1.3",
     "semver": "^7.3.5"
   },
   "devDependencies": {

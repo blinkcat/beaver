@@ -1,5 +1,11 @@
 import { tapable } from '@beaver/utils';
-import { IBeaverPluginFactory, IModifyWebpackConfigArgs, TCreateWebpackConfig } from '@beaver/types';
+import {
+  IBeaverPluginFactory,
+  IModifyWebpackConfigArgs,
+  TCreateWebpackConfig,
+  TBabelTransformOptions,
+  IModifyBabelOptionArgs,
+} from '@beaver/types';
 import webpack from 'webpack';
 import pkg from './package.json';
 import webpackConfigFactory from './webpackConfigFactory';
@@ -11,6 +17,7 @@ const webpack5Plugin: IBeaverPluginFactory = context => {
     webpack: new AsyncSeriesWaterfallHook<[webpack.Configuration, IModifyWebpackConfigArgs]>(['config', 'args']),
     // collect webpack configs
     webpackConfigs: new AsyncSeriesWaterfallHook<[webpack.Configuration[]]>(['configs']),
+    babel: new AsyncSeriesWaterfallHook<[TBabelTransformOptions, IModifyBabelOptionArgs]>(['options', 'args']),
   };
   const createWebpackConfig: TCreateWebpackConfig = async ({ env, isServer }) =>
     hooks.webpack.promise(await webpackConfigFactory(env, context, isServer), { env, isServer, webpack });
@@ -27,6 +34,10 @@ const webpack5Plugin: IBeaverPluginFactory = context => {
         (initialConfig: webpack.Configuration) => hooks.webpackConfigs.promise([initialConfig]),
         true
       );
+      addNewMethod('modifyBabelOptions', (initialOptions: TBabelTransformOptions = {}, args: IModifyBabelOptionArgs) =>
+        hooks.babel.promise(initialOptions, args)
+      );
+
       // add webpack hook
       addNewHook(
         'webpack',
@@ -42,6 +53,9 @@ const webpack5Plugin: IBeaverPluginFactory = context => {
         },
         true
       );
+      addNewHook('babel', ({ pluginName, callback }) => {
+        hooks.babel.tapPromise(pluginName, callback);
+      });
     },
   };
 };

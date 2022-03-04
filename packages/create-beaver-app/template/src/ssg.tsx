@@ -1,45 +1,45 @@
-import { renderToString } from 'react-dom/server';
+import { renderToStaticMarkup, renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
+// @ts-ignore
+import { ChunkExtractor } from '@loadable/server';
 import { Helmet } from 'react-helmet';
-import { ISsgAssets } from '@beaver/types';
+import { TWebpackStatsCompilation } from '@beaver/types';
 import App from './App';
 
-export function render({ url, assets }: { url: string; assets: ISsgAssets }) {
+export function render({ url, stats }: { url: string; stats: TWebpackStatsCompilation }) {
+  const extractor = new ChunkExtractor({ stats });
   const appStr = renderToString(
-    <StaticRouter location={url}>
-      <Helmet>
-        {assets.css.map(url => (
-          <link rel="stylesheet" href={url} key={url} />
-        ))}
-        {assets.js.map(url => (
-          <script defer type="text/javascript" src={url} key={url} />
-        ))}
-      </Helmet>
-      <App />
-    </StaticRouter>
+    extractor.collectChunks(
+      <StaticRouter location={url}>
+        <App />
+      </StaticRouter>
+    )
   );
   const helmet = Helmet.renderStatic();
-  const html = `
-      <!DOCTYPE html>
-      <html lang="zh" ${helmet.htmlAttributes.toString()}>
+  const html =
+    '<!DOCTYPE html>\n' +
+    renderToStaticMarkup(
+      <html {...helmet.htmlAttributes.toComponent()}>
         <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        ${helmet.meta.toString()}
-        ${helmet.link.toString()}
-        ${helmet.script.toString()}
-        ${helmet.title.toString()}
+          <meta charSet="UTF-8" />
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          {helmet.meta.toComponent()}
+          {helmet.link.toComponent()}
+          {helmet.script.toComponent()}
+          {helmet.title.toComponent()}
+          {extractor.getStyleElements()}
+          {extractor.getScriptElements({ async: false, defer: true })}
         </head>
-        <body ${helmet.bodyAttributes.toString()}>
-          <div id="root">${appStr}</div>
+        <body {...helmet.bodyAttributes.toComponent()}>
+          <div id="root" dangerouslySetInnerHTML={{ __html: appStr }} />
         </body>
       </html>
-      `;
+    );
 
   return { html };
 }
 
-export const routes = async () => {
+export async function routes() {
   return ['/', '/world'];
-};
+}
